@@ -33,7 +33,7 @@ final case class IndexedContsT[W[_], M[_], R, O, A](_run: W[A => M[O]] => M[R]) 
       run(W.map(wami) { ami => { a => M.map(ami(a))(f) } })
     }
 
-  def imap[E](f: R => E)(implicit M: Functor[M]): IndexedContsT[W, M, E, O, A] =
+  def leftMap[E](f: R => E)(implicit M: Functor[M]): IndexedContsT[W, M, E, O, A] =
     IndexedContsT { wamo =>
       M.map(run(wamo))(f)
     }
@@ -57,7 +57,7 @@ final case class IndexedContsT[W[_], M[_], R, O, A](_run: W[A => M[O]] => M[R]) 
 object IndexedContsT extends IndexedContsTInstances with IndexedContsTFunctions
 
 trait IndexedContsTFunctions {
-  def point[W[_], M[_], R, A](a: => A)(implicit W: Comonad[W]): ContsT[W, M, R, A] =
+  def pure[W[_], M[_], R, A](a: => A)(implicit W: Comonad[W]): ContsT[W, M, R, A] =
     ContsT { k => W.extract(k)(a) }
 
   def empty[W[_], M[_], R, A](implicit M: MonoidK[M]): ContsT[W, M, R, A] =
@@ -151,7 +151,7 @@ abstract class IndexedContsTInstances extends IndexedContsTInstances0 {
 private sealed trait IndexedContsTFunctorLeft[W[_], M[_], O, A0] extends Functor[IndexedContsT[W, M, ?, O, A0]] {
   implicit val M: Functor[M]
 
-  override def map[A, B](fa: IndexedContsT[W, M, A, O, A0])(f: A => B): IndexedContsT[W, M, B, O, A0] = fa.imap(f)
+  override def map[A, B](fa: IndexedContsT[W, M, A, O, A0])(f: A => B): IndexedContsT[W, M, B, O, A0] = fa.leftMap(f)
 }
 
 private sealed trait IndexedContsTFunctorRight[W[_], M[_], R, O] extends Functor[IndexedContsT[W, M, R, O, ?]] {
@@ -175,7 +175,7 @@ private sealed trait IndexedContsTBifunctor[W[_], M[_], O] extends Bifunctor[Ind
 
   override def leftFunctor[X]: Functor[IndexedContsT[W, M, ?, O, X]] = IndexedContsT.IndexedContsTFunctorLeft
 
-  override def leftMap[A, B, C](fa: IndexedContsT[W, M, A, O, B])(f: A => C): IndexedContsT[W, M, C, O, B] = fa.imap(f)
+  override def leftMap[A, B, C](fa: IndexedContsT[W, M, A, O, B])(f: A => C): IndexedContsT[W, M, C, O, B] = fa.leftMap(f)
 
   override def rightFunctor[X]: Functor[IndexedContsT[W, M, X, O, ?]] = IndexedContsT.IndexedContsTFunctorRight
 }
@@ -191,7 +191,7 @@ private sealed trait ContsTFlatMap[W[_], M[_], R] extends FlatMap[ContsT[W, M, R
 private sealed trait ContsTMonad[W[_], M[_], R] extends Monad[ContsT[W, M, R, ?]] with ContsTFlatMap[W, M, R] with StackSafeMonad[ContsT[W, M, R, ?]] {
   implicit val W: Comonad[W]
 
-  override def pure[A](x: A): ContsT[W, M, R, A] = IndexedContsT.point(x)
+  override def pure[A](x: A): ContsT[W, M, R, A] = IndexedContsT.pure(x)
 }
 
 private sealed trait ContsTAlternative[W[_], M[_], R] extends Alternative[ContsT[W, M, R, ?]] with ContsTMonad[W, M, R] {
