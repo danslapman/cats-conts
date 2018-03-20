@@ -141,8 +141,8 @@ abstract class IndexedContsTInstances extends IndexedContsTInstances0 {
       implicit val M: Functor[M] = M0
     }
 
-  implicit def ContsTMonadPlus[W[_], M[_], R](implicit W0: Comonad[W], M0: MonoidK[M]): Alternative[ContsT[W, M, R, ?]] =
-    new ContsTMonadPlus[W, M, R] {
+  implicit def ContsTAlternative[W[_], M[_], R](implicit W0: Comonad[W], M0: MonoidK[M]): Alternative[ContsT[W, M, R, ?]] =
+    new ContsTAlternative[W, M, R] {
       implicit val W: Comonad[W] = W0
       implicit val M: MonoidK[M] = M0
     }
@@ -180,7 +180,7 @@ private sealed trait IndexedContsTBifunctor[W[_], M[_], O] extends Bifunctor[Ind
   override def rightFunctor[X]: Functor[IndexedContsT[W, M, X, O, ?]] = IndexedContsT.IndexedContsTFunctorRight
 }
 
-private sealed trait ContsTBind[W[_], M[_], R] extends FlatMap[ContsT[W, M, R, ?]] with IndexedContsTFunctorRight[W, M, R, R] {
+private sealed trait ContsTFlatMap[W[_], M[_], R] extends FlatMap[ContsT[W, M, R, ?]] with IndexedContsTFunctorRight[W, M, R, R] {
   implicit val W: CoflatMap[W]
 
   override def flatMap[A, B](fa: ContsT[W, M, R, A])(f: A => ContsT[W, M, R, B]): ContsT[W, M, R, B] = fa.flatMap(f)
@@ -188,13 +188,13 @@ private sealed trait ContsTBind[W[_], M[_], R] extends FlatMap[ContsT[W, M, R, ?
   override def flatten[A](ffa: ContsT[W, M, R, ContsT[W, M, R, A]]): ContsT[W, M, R, A] = ffa.flatten
 }
 
-private sealed trait ContsTMonad[W[_], M[_], R] extends Monad[ContsT[W, M, R, ?]] with ContsTBind[W, M, R] with StackSafeMonad[ContsT[W, M, R, ?]] {
+private sealed trait ContsTMonad[W[_], M[_], R] extends Monad[ContsT[W, M, R, ?]] with ContsTFlatMap[W, M, R] with StackSafeMonad[ContsT[W, M, R, ?]] {
   implicit val W: Comonad[W]
 
   override def pure[A](x: A): ContsT[W, M, R, A] = IndexedContsT.point(x)
 }
 
-private sealed trait ContsTMonadPlus[W[_], M[_], R] extends Alternative[ContsT[W, M, R, ?]] with ContsTMonad[W, M, R] {
+private sealed trait ContsTAlternative[W[_], M[_], R] extends Alternative[ContsT[W, M, R, ?]] with ContsTMonad[W, M, R] {
   implicit val M: MonoidK[M]
 
   override def empty[A]: ContsT[W, M, R, A] = IndexedContsT.empty

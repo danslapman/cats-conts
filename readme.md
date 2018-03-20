@@ -8,5 +8,5 @@ cats-conts is available via bintray:
 ```
     resolvers += Resolver.bintrayRepo("danslapman", "maven")
 
-    libraryDependencies += "danslapman" %% "cats-conts" % "0.1"
+    libraryDependencies += "danslapman" %% "cats-conts" % "0.2"
 ```
