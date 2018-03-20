@@ -1,6 +1,6 @@
 package cats.conts
 
-import cats.{Alternative, Applicative, Bifunctor, CoflatMap, Comonad, Contravariant, FlatMap, Functor, Monad, MonoidK, SemigroupK, ~>}
+import cats.{Alternative, Applicative, Bifunctor, CoflatMap, Comonad, Contravariant, FlatMap, Functor, Monad, MonoidK, SemigroupK, StackSafeMonad, ~>}
 
 import scala.language.higherKinds
 
@@ -188,15 +188,10 @@ private sealed trait ContsTBind[W[_], M[_], R] extends FlatMap[ContsT[W, M, R, ?
   override def flatten[A](ffa: ContsT[W, M, R, ContsT[W, M, R, A]]): ContsT[W, M, R, A] = ffa.flatten
 }
 
-private sealed trait ContsTMonad[W[_], M[_], R] extends Monad[ContsT[W, M, R, ?]] with ContsTBind[W, M, R] {
+private sealed trait ContsTMonad[W[_], M[_], R] extends Monad[ContsT[W, M, R, ?]] with ContsTBind[W, M, R] with StackSafeMonad[ContsT[W, M, R, ?]] {
   implicit val W: Comonad[W]
 
   override def pure[A](x: A): ContsT[W, M, R, A] = IndexedContsT.point(x)
-
-  override def tailRecM[A, B](a: A)(f: A => ContsT[W, M, R, Either[A, B]]): ContsT[W, M, R, B] = flatMap(f(a)) {
-    case Left(a) => tailRecM(a)(f)
-    case Right(b) => pure(b)
-  }
 }
 
 private sealed trait ContsTMonadPlus[W[_], M[_], R] extends Alternative[ContsT[W, M, R, ?]] with ContsTMonad[W, M, R] {
