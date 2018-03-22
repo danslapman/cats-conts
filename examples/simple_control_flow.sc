@@ -24,8 +24,29 @@ import cats.syntax.cps._
 
 val prog = for {
   _ <- println("Before shift").pure[Id].cps_
-  _ <- Cont[Unit, Unit](cont => {println("Inside shift"); cont()})
+  _ <- Cont[Unit, Unit](cont => {
+    println("Inside shift")
+    cont()
+  })
   _ <- println("After reset").pure[Id].cps_
 } yield ()
 
 prog.run(_ => println("After shift"))
+
+println()
+
+/*
+  `prog2` shows retry possibility
+ */
+
+val prog2 = for {
+  _ <- println("Before shift").pure[Id].cps_
+  _ <- Cont[Unit, Unit](cont => {
+    println("Inside shift")
+    cont()
+    cont()
+  })
+  _ <- println("After reset").pure[Id].cps_
+} yield ()
+
+prog2.run(_ => println("After shift"))
