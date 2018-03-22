@@ -3,6 +3,8 @@ cats-conts [ ![Download](https://api.bintray.com/packages/danslapman/maven/cats-
 
 cats-conts is a port of scalaz's `IndexedContsT` for cats ecosystem
 
+See `examples` for some usage examples (runnable with [ammonite](http://ammonite.io))
+
 cats-conts is available via bintray:
 
 ```
