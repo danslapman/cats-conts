@@ -39,14 +39,18 @@ println()
   `prog2` shows retry possibility
  */
 
+var cont: Unit => Unit = null
+
 val prog2 = for {
   _ <- println("Before shift").pure[Id].cps_
-  _ <- Cont[Unit, Unit](cont => {
+  _ <- Cont[Unit, Unit](cnt => {
     println("Inside shift")
-    cont()
-    cont()
+    cont = cnt
   })
   _ <- println("After reset").pure[Id].cps_
 } yield ()
 
 prog2.run(_ => println("After shift"))
+
+cont()
+cont()
