@@ -1,5 +1,5 @@
-import $file.`dep`
-import $ivy.`danslapman::cats-conts:0.4`
+import $file.dep
+import $ivy.`danslapman::cats-conts:0.5`
 
 import cats._
 import cats.conts._
