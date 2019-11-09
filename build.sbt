@@ -2,13 +2,18 @@ name := "cats-conts"
 
 organization := "danslapman"
 
-version := "0.4"
+version := "0.5"
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.13.1"
 
-crossScalaVersions := Seq("2.11.12", "2.12.10")
+crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.1")
 
-scalacOptions += "-Ypartial-unification"
+scalacOptions ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, y)) if y < 13 => Seq("-Ypartial-unification")
+    case _ => Seq()
+  }
+}
 
 addCompilerPlugin("org.typelevel" % "kind-projector" % "0.11.0" cross CrossVersion.full)
 
